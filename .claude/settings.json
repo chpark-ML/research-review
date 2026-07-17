@@ -58,17 +58,17 @@
           }
         ]
       }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash .claude/hooks/guardrail-ai-attribution.sh"
-          }
-        ]
-      }
     ]
+  },
+  "extraKnownMarketplaces": {
+    "research-mono": {
+      "source": {
+        "source": "github",
+        "repo": "chpark-ML/research-mono"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "ai-guard@research-mono": true
   }
 }
