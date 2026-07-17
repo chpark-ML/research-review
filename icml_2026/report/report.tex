@@ -1,0 +1,470 @@
+% !TEX program = xelatex
+% ICML 2026 참관 리서치 리포트
+% 빌드: make  (또는 xelatex report.tex 2회)
+\documentclass[10pt]{article}
+
+% ---------- 언어/폰트 ----------
+\usepackage{kotex}
+\usepackage{fontspec}
+\setmainhangulfont{Apple SD Gothic Neo}
+\setsanshangulfont{Apple SD Gothic Neo}
+
+% ---------- 레이아웃 ----------
+\usepackage{amsmath}
+\usepackage[a4paper,margin=22mm,headsep=7mm]{geometry}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{needspace}
+\usepackage{caption}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+% EXIF 회전을 픽셀에 반영한 사본(assets/)을 우선 사용 — 원본은 fallback
+\graphicspath{{assets/research/}{assets/}{assets/booth/}{../pictures/research/}{../pictures/}{../pictures/booth/}}
+
+% ---------- 색/스타일 ----------
+\definecolor{icmlblue}{HTML}{1F3A93}
+\definecolor{accent}{HTML}{2E86C1}
+\definecolor{softgray}{HTML}{6B7280}
+\definecolor{rule}{HTML}{D5DBDB}
+\definecolor{labelbg}{HTML}{EEF1F8}   % 스펙 표 라벨열 배경
+\definecolor{resultbg}{HTML}{EAF3FA}  % 핵심 결과 박스 배경
+
+\hypersetup{colorlinks=true, linkcolor=icmlblue, urlcolor=accent, citecolor=accent}
+\captionsetup{font=small, labelfont={bf,color=icmlblue!85!black}}
+
+\titleformat{\section}{\large\bfseries\color{icmlblue}}{\thesection}{0.6em}{}[{\color{rule}\titlerule[0.8pt]}]
+\titlespacing*{\section}{0pt}{14pt}{7pt}
+
+\setlist[itemize]{leftmargin=1.4em, topsep=2pt, itemsep=1.5pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{softgray} ICML 2026 참관 리서치 리포트}
+\fancyhead[R]{\small\color{softgray} Seoul, Korea}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% 긴 URL이 여백을 넘지 않도록 줄바꿈 허용
+\Urlmuskip=0mu plus 1mu\relax
+\def\UrlBreaks{\do\/\do\-\do\.\do\_\do\a\do\b\do\c\do\d\do\e\do\f\do\g\do\h\do\i\do\j\do\k\do\l\do\m\do\n\do\o\do\p\do\q\do\r\do\s\do\t\do\u\do\v\do\w\do\x\do\y\do\z}
+\emergencystretch=2em
+
+% ---------- 헬퍼 매크로 ----------
+% 섹션 제목이 페이지 하단에 홀로 남지 않도록 최소 공간 확보
+\newcommand{\sect}[1]{\clearpage\section{#1}}
+% 오프닝 갤러리 사진 (2열, 높이 통일)
+\newcommand{\gphoto}[2]{%
+  \begin{minipage}[t]{0.485\linewidth}\centering
+  \includegraphics[height=48mm,keepaspectratio]{#1}\par\vspace{2pt}
+  {\footnotesize\color{softgray}#2}\end{minipage}}
+% 논문 단위를 통짜 박스(minipage)로 묶어 페이지 경계에서 잘리지 않게 하고, 번호 매긴 소제목을 목차에 등록
+\newenvironment{paperbox}[1]{%
+  \par\addvspace{6pt}%
+  \refstepcounter{subsection}%
+  \phantomsection
+  \addcontentsline{toc}{subsection}{\protect\numberline{\thesubsection}#1}%
+  \noindent\begin{minipage}{\linewidth}%
+  \setlength{\parindent}{0pt}%
+  {\normalsize\bfseries\color{icmlblue!85!black}\thesubsection\quad #1\par}\vspace{3pt}%
+}{%
+  \end{minipage}\par\addvspace{10pt}%
+}
+\newcommand{\meta}[1]{{\footnotesize\color{softgray}\sffamily\raggedright #1\par}\vspace{3pt}}
+% 논문 스펙 카드: 연구 배경 / 기존 방법의 한계 / 정의한 문제 / 해결 방법
+\newcommand{\pcard}[4]{%
+{\footnotesize\renewcommand{\arraystretch}{1.3}%
+\begin{tabular}{@{}>{\columncolor{labelbg}\bfseries\color{icmlblue!88!black}}p{2.35cm} p{13.5cm}@{}}
+\toprule
+연구 배경 & #1\\ \midrule
+기존 방법의 한계 & #2\\ \midrule
+정의한 문제 & #3\\ \midrule
+해결 방법 & #4\\
+\bottomrule
+\end{tabular}}\par\vspace{4pt}}
+% 핵심 결과: 옅은 배경 박스로 시각 분리
+\newcommand{\result}[1]{%
+{\setlength{\fboxsep}{4pt}%
+\noindent\colorbox{resultbg}{\parbox{\dimexpr\linewidth-10pt\relax}{\footnotesize\textbf{\color{accent}핵심 결과.}\ #1}}\par}\vspace{4pt}}
+% 그림 (paperbox 내부) — 중앙 정렬 이미지 + 캡션
+\newcommand{\shot}[3]{\par\vspace{2pt}{\centering\includegraphics[width=#2\linewidth]{#1}\par\vspace{1pt}\captionof{figure}{#3}\par}}
+
+% ================================================================
+\begin{document}
+
+% ---------- 표지 ----------
+\begin{titlepage}
+\centering
+\vspace*{3.0cm}
+{\color{softgray}\large International Conference on Machine Learning}\\[4pt]
+{\color{icmlblue}\Huge\bfseries ICML 2026 참관 리서치 리포트}\\[10pt]
+{\large 포스터 · 구두 발표 리뷰}\\[6pt]
+{\color{softgray} Poster \& Oral Session Notes}\\[2.2cm]
+
+{\large 주제 : 의료 AI · Tabular · Diffusion LM · 효율화 · 학습/평가}\\[6pt]
+{\large 정리 대상 : 인상 깊었던 논문 · 발표 14편}\\[2.2cm]
+
+{\color{softgray} 개최지 : Seoul, Republic of Korea (2026년 7월)}\\[3pt]
+{\color{softgray} 작성일 : 2026년 7월}\\
+\vfill
+\end{titlepage}
+
+% ---------- 오프닝: 현장 스케치 ----------
+\newpage
+\thispagestyle{fancy}
+{\centering
+{\Large\bfseries\color{icmlblue} ICML 2026 · Seoul — 현장 스케치}\par\vspace{3pt}
+{\small\color{softgray} 등록 · 학회장 · Sponsor Expo}\par}
+\vspace{12pt}
+
+\noindent\gphoto{01.jpeg}{등록 데스크 — ICML 2026 Registration}\hfill%
+\gphoto{03.jpeg}{학회장(COEX)에서 바라본 서울}\par\vspace{10pt}
+
+\noindent\gphoto{booth/01.jpeg}{Sponsor Expo 안내도}\hfill%
+\gphoto{booth/03.jpeg}{Expo 전시장 전경 (Two Sigma · LawZero 등)}\par\vspace{10pt}
+
+\noindent\gphoto{booth/09.jpeg}{OpenAI 부스 — Leadership Q\&A}\hfill%
+\gphoto{booth/02.jpeg}{Google Research 부스}\par\vspace{10pt}
+
+\noindent\gphoto{booth/06.jpeg}{Alibaba — AI Research Tech Talk}\hfill%
+\gphoto{booth/04.jpeg}{ByteDance 부스}\par
+
+% ---------- 목차 ----------
+\newpage
+\renewcommand{\contentsname}{\color{icmlblue}Contents \normalfont\normalsize (목차)}
+\tableofcontents
+\thispagestyle{fancy}
+
+% ================================================================
+\newpage
+\section{연구 동향 종합 (Overall Research Trends)}
+
+2026년 7월 서울에서 열린 ICML 2026에서 직접 둘러본 발표 가운데 인상 깊은 14편을 골랐다.
+개별 리뷰에 앞서 전체를 관통하는 연구 동향을 표로 요약하고, 이후 장에서 각 논문의
+\textbf{연구 배경 · 기존 방법의 한계 · 정의한 문제 · 해결 방법}을 표로 상세히 다룬다.
+
+\vspace{5pt}
+\noindent\begin{minipage}{\linewidth}
+{\small\renewcommand{\arraystretch}{1.4}%
+\begin{tabular}{@{}>{\columncolor{labelbg}\bfseries\color{icmlblue!88!black}}p{3.0cm} p{9.4cm} p{3.2cm}@{}}
+\toprule
+\textbf{\color{icmlblue!88!black}동향} & \textbf{핵심 내용} & \textbf{대표 발표} \\
+\midrule
+성능 → 배포 가능성 &
+높은 지표보다 임상의가 \textbf{신뢰·감사·현장 실행}할 수 있는 형태를 우선. 모델 가치를 현장 의사결정에 얼마나 안전히 꽂히는가로 측정. &
+AgentScore · DMAE · MA-RAG · Lab-in-the-Loop \\
+\midrule
+Agentic propose--validate 표준화 &
+\textbf{``LLM이 제안 → 도구·보상이 검증''} 골격이 도메인 불문 표준. 생성의 유연함을 결정론적 검증으로 감싸 신뢰성 확보. &
+AgentScore · MA-RAG · CRL-BPT \\
+\midrule
+통념·측정의 재검토 &
+지도학습의 직관이 RL로 이전되지 않고(\textbf{AdamW→SGD}), perplexity가 계열 간 비교에서 오도. ``잘못된 지표 최적화 → 잘못된 결론''. &
+Do We Need Adam? · Scaling Beyond Masked Diffusion \\
+\midrule
+Diffusion LM 성숙·효율화 &
+perplexity 단일 지표를 넘어 \textbf{scaling law · downstream · NFE}까지 다차원 비교. 생성 순서(unmasking) 자체를 학습 대상으로. &
+Scaling Beyond Masked Diffusion · Learning Unmasking Policies \\
+\midrule
+데이터 중심 + 해석가능성 &
+모호한 ``다양성''을 \textbf{feature coverage(FAC)}로 재정의($\approx$150$\times$ 효율). XAI를 설명이 아닌 \textbf{진단·개입(제어면)}으로 사용. &
+Less is Enough (FAC) · SENSEI \\
+\midrule
+극한 효율화 · Tabular 재조명 &
+QAT 없이 \textbf{1.58-bit ternary} 배포 실용화. tabular는 명시적 귀납 편향과 LLM 예측 추론 한계를 함께 조명. &
+CAT-Q · LassoFlexNet · TopBench \\
+\bottomrule
+\end{tabular}}
+\captionof{table}{ICML 2026 주요 연구 동향 6가지와 대표 발표.}
+\end{minipage}
+
+\vspace{7pt}
+\noindent 요약하면, ICML 2026의 연구들은 \emph{더 큰 모델}보다 \emph{올바른 목표·형태·측정}을 향하고 있었다 —
+무엇을 최적화할지(coverage, deployability), 어떻게 검증할지(agentic verification),
+무엇을 통념으로 두지 않을지(optimizer, perplexity)를 다시 묻는 연구들이 특히 인상 깊었다.
+
+\vspace{10pt}
+\noindent\begin{minipage}{\linewidth}
+{\normalsize\bfseries\color{icmlblue!85!black} 그 외 주목할 Spotlight (미리뷰, 관심 주제별)}\par\vspace{2pt}
+{\small ICML 2026은 별도 Oral 트랙 없이 채택작 6{,}796편 중 574편($\approx$8\%)만 \textbf{Spotlight}로
+선정한다 (리뷰 14편 중 4편이 Spotlight — 본문 목록·각 리뷰에 표기). 여기서는 직접 리뷰하지 않은
+Spotlight 가운데 관심 주제(LLM · RAG · Medical · Interpretability) 해당작을 공식 프로그램
+데이터에서 추려 둔다. LLM 계열은 136편에 달해 oral talk을 겸한 것 중 위 동향과 결이 맞는 7편만
+골랐고, medical은 임상·헬스케어 중심으로 추렸다(단백질·신약 설계 계열 제외).
+$\dagger$\,= oral talk 겸함.}\par\vspace{4pt}
+{\footnotesize\renewcommand{\arraystretch}{1.3}%
+\begin{tabular}{@{}>{\columncolor{labelbg}\bfseries\color{icmlblue!88!black}}p{2.45cm} p{13.15cm}@{}}
+\toprule
+Medical /\newline Clinical &
+\textbf{ClinTutor-R1} — 회진처럼 한 교수자가 다수 훈련생을 동시에 지도하는 1:N 임상 교육을 multi-agent 시뮬레이터로 모델링·학습 \newline
+\textbf{HypoSpace} — 관측만으로 가설이 정해지지 않는 상황에서 LLM의 가설 공간 탐색·커버리지를 평가하는 진단 벤치마크 \newline
+\textbf{GI Auscultation} — 장음(bowel sound)에서 heavy-tailed 임상 잡음을 Cauchy diffusion bridge로 분리해 비침습 진단 신호 복원 \newline
+\textbf{Heart Transplant (Position)} — 장기 배분은 최적화가 아닌 이해관계자 게임 — 배분 정책 ML은 인센티브를 고려해야 한다 \newline
+\textbf{Seizure-Semiology-Suite ($S^3$)} — 발작 비디오 438개·라벨 35K(ILAE 20개 semiology)로 MLLM의 발작 이해를 평가 \newline
+\textbf{SleepLM} — 수면다원검사(PSG)와 자연어를 정렬한 수면 foundation model — 언어로 수면 현상을 기술·질의 \newline
+\textbf{SurvDiff} — 중도절단(censoring) 메커니즘까지 재현하는 생존분석 전용 합성 데이터 diffusion 모델 \\
+\midrule
+RAG &
+\textbf{TG-RAG}$^\dagger$ — expert prior 기반 thought guidance를 검색해 생성을 조향 — 특화 도메인 워크플로의 cognitive drift 완화 \newline
+\textbf{Train for Truth} — 검색 근거와 모순 없으면 1/있으면 0의 binary reward로 online RL — 능력 보존하며 hallucination 감소 \newline
+\textbf{Linguistic Nepotism} — 관련성이 같아도 특정 언어 문서를 우대 인용하는 multilingual RAG의 편향을 규명 \\
+\midrule
+Interpretability &
+\textbf{Activation Oracles}$^\dagger$ — activation을 입력받아 자연어로 답하는 LatentQA를 범용화 — OOD에서도 동작하는 activation 해석기 \newline
+\textbf{Mechanistic Data Attribution}$^\dagger$ — influence function으로 해석 가능한 회로·헤드의 형성 기원을 학습 데이터까지 역추적 \newline
+\textbf{Long-Horizon Interpretability}$^\dagger$ — 긴 추론 체인에서 $O(|S|^2)$ 비용과 attribution 소실을 해결한 multi-token 입력 귀속 \newline
+\textbf{Robust Harmful Features}$^\dagger$ — jailbreak은 safety feature를 지우는 게 아니라 특정 attention head를 선택적으로 억제함을 규명 \newline
+\textbf{Compositional Explanations}$^\dagger$ — 뉴런의 논리 규칙(compositional) 설명에 beam search 없이 최적성 보장을 부여 \newline
+\textbf{LM Circuits Are Sparse} — MLP 뉴런 기저가 SAE만큼 sparse함을 최초 실증 — SAE 없이 뉴런 기반 circuit tracing \newline
+\textbf{SVD Interpretability} — 보조 모델(SAE) 학습 없이 MLP 가중치의 SVD만으로 해석하는 training-free 기법 \newline
+\textbf{Concept Bottleneck MoE} — CBM의 예측기를 전문가 혼합·다양한 함수형으로 일반화해 정확도와 해석성 양립 \newline
+\textbf{Time Series Saliency Maps} — Integrated Gradients를 가역 변환 도메인(주파수 등)으로 일반화한 시계열 귀속 \\
+\midrule
+LLM &
+\textbf{The Flexibility Trap}$^\dagger$ — any-order 생성이 스도쿠엔 유리하나 수학·코딩 일반 추론에선 오히려 해가 됨을 규명 \newline
+\textbf{WeDLM}$^\dagger$ — 표준 causal attention만으로 diffusion 디코딩 — prefix KV cache를 유지해 최적화 AR 엔진급 속도 \newline
+\textbf{How Much Can LMs Memorize?}$^\dagger$ — 암기를 unintended memorization vs generalization으로 분리해 모델 저장 용량 측정 \newline
+\textbf{Reasoning Collapse}$^\dagger$ — multi-turn agent RL에서 추론이 입력 무관 템플릿으로 붕괴 — $H(Z|X)$·$I(X;Z)$ 분해로 탐지 \newline
+\textbf{OMAC}$^\dagger$ — LLM 멀티에이전트 시스템의 구조·프롬프트를 체계적으로 최적화하는 범용 프레임워크 \newline
+\textbf{Evolving Rubrics}$^\dagger$ — 검증 어려운 long-form deep research를 정책과 함께 진화하는 rubric 보상으로 RL 학습 \newline
+\textbf{ReQAT}$^\dagger$ — FP4 실패가 숫자·연산자 같은 low-entropy 토큰에 집중됨을 규명 — 겨냥 QAT로 full-precision 추론 복원 \\
+\bottomrule
+\end{tabular}}
+\captionof{table}{미리뷰 Spotlight 중 관심 주제 선별 — 한줄 요약 (원제목·링크는 \texttt{papers/README.md}).}
+\end{minipage}
+
+% ================================================================
+\sect{개요 및 전체 목록 (Overview)}
+
+각 항목은 발표장에서 촬영한 포스터/슬라이드와 함께, \textbf{연구 배경 · 기존 방법의 한계 · 정의한 문제 ·
+해결 방법}을 표로 요약하고 핵심 결과를 덧붙였다. 전문용어·메서드·데이터셋·메트릭명은 원문(영문)을 유지한다.
+정리 순서는 다섯 주제를 따른다: (1) 의료·헬스케어 AI, (2) Tabular Learning, (3) Diffusion Language
+Models, (4) LLM 효율화·프롬프트, (5) 학습·평가·해석가능성. 본문에서 다룬 논문 원문 PDF는
+\texttt{icml\_2026/papers/} 아래에 함께 모아 두었다(키노트 및 OpenReview 전용 2편 제외).
+
+\vspace{5pt}
+\noindent\begin{minipage}{\linewidth}
+\renewcommand{\arraystretch}{1.3}\small
+\begin{tabular}{@{}p{2.6cm} p{6.2cm} p{3.8cm} p{2.2cm}@{}}
+\toprule
+\textbf{\color{icmlblue!88!black}분야} & \textbf{제목 / 약칭} & \textbf{소속} & \textbf{형태} \\
+\midrule
+\multirow{4}{*}{의료 AI}
+ & AgentScore & U.\ Cambridge & 포스터 \\
+ & DMAE (Cognitive-Aware Diagnosis) & CUHK-Shenzhen & 포스터 \\
+ & MA-RAG & Nanjing / Huawei & 포스터 \\
+ & Lab-in-the-Loop & Genentech (키노트) & 키노트 \\
+\midrule
+\multirow{2}{*}{Tabular}
+ & TopBench & Nanjing (LAMDA) & 포스터 \\
+ & LassoFlexNet & RBC Borealis & 포스터 \\
+\midrule
+\multirow{2}{*}{Diffusion LM}
+ & Scaling Beyond Masked Diffusion & Cornell / NVIDIA & 포스터 \\
+ & Learning Unmasking Policies & Apple / MIT / UvA & \textbf{Spotlight} \\
+\midrule
+\multirow{2}{*}{효율화/프롬프트}
+ & CAT-Q (ternary PTQ) & Intel Labs China & \textbf{Spotlight} \\
+ & CRL-BPT & Shandong UFE & 포스터 \\
+\midrule
+\multirow{4}{*}{학습/평가}
+ & Do We Need Adam? (RLVR) & UIUC & \textbf{Spotlight} \\
+ & Less is Enough (FAC coverage) & UGA / HK PolyU & \textbf{Spotlight} \\
+ & SENSEI & USC & 포스터 \\
+ & Parametric Prior Mapping (PPM) & Central South U & 포스터 \\
+\bottomrule
+\end{tabular}
+\captionof{table}{리뷰 대상 논문·발표 14편.}
+\end{minipage}
+
+% ================================================================
+\sect{의료·헬스케어 AI}
+
+가장 눈여겨본 주제다. 공통 키워드는 \textbf{임상 배포 가능성(deployability)}과
+\textbf{에이전트 기반 추론(agentic reasoning)} 이었다 — 성능 지표를 넘어 임상의가
+신뢰·검증·배포할 수 있는 형태를 지향하는 흐름이 뚜렷했다.
+
+\begin{paperbox}{AgentScore — LLM 에이전트 기반 임상 스코어링 시스템 자동 구축}
+\meta{Silas Ruhrberg Estévez, Christopher Chiu, Mihaela van der Schaar · van der Schaar Lab, University of Cambridge · 포스터 · arXiv:2601.22324}
+\pcard
+{임상 현장은 CURB-65처럼 소수의 해석 가능한 규칙으로 된 \textbf{compact scoring system}에 의존한다. 예측력 높은 ML 모델은 memorability·auditability·bedside 실행 제약과 어긋나 실제 진료에 정착하지 못한다.}
+{RiskSLIM·FasterRisk는 \textbf{non-unit 정수 가중치}라 암산 부담이 크다. Optimal Checklists 등은 \textbf{미리 정의된 고정 feature} 위에서만 최적화해, raw 변수로부터 임상 규칙(생리 비율·시계열 변화 등)을 자동 구성·선택하지 못한다.}
+{raw 변수로부터 rule 구성과 subset 선택을 동시에 최적화해, 크기 $|S|\leq m$·unit weight 같은 hard deployability 제약을 만족하는 \textbf{unit-weighted N-of-M checklist} scoring system을 학습.}
+{\textbf{propose--validate 루프}(GPT-5 백본): LLM agent가 제한된 clinical grammar 안에서 후보 규칙을 제안 → deterministic validation($\text{AUROC}\geq\tau$, Jaccard 중복 제거) + clinical plausibility agent가 검증 → score assembly agent가 조립. threshold는 Youden's J로 데이터에서 결정.}
+\result{MIMIC-IV·eICU 8개 과제 평균 AUROC \textbf{0.71} — RiskSLIM 대비 +0.05, FasterRisk 대비 +0.03 ($p<0.001$). 외부 검증에서 SOFA/SAPS-I·guideline보다 높음(ICU 0.701 vs 0.660). 임상의 18명 중 67\%가 AgentScore 선호, \textbf{배포 선호 81\%} vs 19\%.}
+\shot{research_7.JPG}{0.42}{AgentScore 포스터 (U.\ Cambridge). 규칙 제안·결정론적 검증·임상의 리뷰·프라이버시 감사까지 배포 관점 전 과정을 다룬다.}
+\end{paperbox}
+
+\begin{paperbox}{DMAE — Latent Perturbation 기반 Cognitive-Aware 진단}
+\meta{Yuting Yan, Yinghao Fu, Wendi Ren, Haozhou Gao, Shuang Li · CUHK-Shenzhen / City University of Hong Kong · 포스터 (OpenReview: rEzGzILnVC)}
+\pcard
+{희귀질환은 증상이 흔해 보이고 핵심 검사가 누락되기 쉽다. AI와 임상의 모두 흔한 진단에 고착되는 \textbf{cognitive anchoring}이 오진을 부른다.}
+{정확도 중심 진단 모델은 예측 확률만 제시할 뿐, \textbf{어떤 검사가 빠졌고 왜 rare 진단을 놓치는지 설명하지 못해} 임상 의사결정 자체를 교정하지 못한다.}
+{disease--symptom 구조와 임상의 진단 패턴을 학습한 latent 공간에서, 누락된 증거를 드러내 rare-yet-plausible 진단을 대비적으로 부각하는 \textbf{counterfactual 시나리오} 생성.}
+{\textbf{DMAE}: latent $Z$(rare vs.\ common)에 attention mask를 씌우고 $\Delta Z^{*}=\arg\max$ Entropy로 교란해 누락 검사를 복원, rare 가설로 재유도.}
+\result{7개 코호트(공개 4 + 비공개 3)에서 rare 진단 탐지력을 높이면서 common 진단 정확도는 유지. 포스터 기준 physician-reviewed 사례의 \textbf{약 90\%}가 임상적으로 타당·유용으로 평가.}
+\shot{research_8.JPG}{0.42}{DMAE 포스터 (CUHK-Shenzhen). Acromegaly 사례에서 OGTT-GH 누락을 보정하자 rare 확률이 $0.53\rightarrow1.00$으로 이동.}
+\end{paperbox}
+
+\begin{paperbox}{MA-RAG — Multi-Round Agentic RAG로 의료 추론 강화}
+\meta{Wenhao Wu, Zhentao Tang, Yafu Li, Shixiong Kai, Mingxuan Yuan, Zhenhong Sun, Chunlin Chen, Zhi Wang · Nanjing University / Huawei Noah's Ark Lab / CUHK / ANU · 포스터 · arXiv:2603.03292}
+\pcard
+{LLM은 의료 QA에서 높은 추론력을 보이지만 \textbf{hallucination}과 outdated knowledge가 안전-민감 의료 현장에 위험을 준다. RAG가 이를 완화하나 복잡한 multi-step 추론에는 부족하다.}
+{single-round RAG는 복잡 추론에서 실패하고 noise를 유입한다. FLARE·DRAGIN 등 adaptive RAG는 \textbf{token-level 신호}(confidence·entropy)에 의존하는데, LLM은 high confidence로도 hallucinate해 신호를 신뢰할 수 없다.}
+{multi-round adaptive RAG를 iterative context optimization으로 정식화. noisy token 신호 대신 후보 응답 간 \textbf{semantic conflict를 신호로} 삼아, 외부 근거와 내부 reasoning history를 반복 진화시켜 consensus로 수렴.}
+{\textbf{Solver → Retrieval → Ranking} 3-에이전트: 다양한 $N$개 후보 생성 → conflict를 conflict-aware query로 바꿔 의료 corpus 검색 → intrinsic entropy + extrinsic verifier로 history 재정렬. conflict를 residual로 보는 boosting 메커니즘.}
+\result{7개 의료 벤치에서 backbone(Qwen3-8B) 대비 평균 \textbf{+6.8}. MA-RAG-ext 62.2로 최강 RAG baseline(TC-RAG 56.9)보다 +5.3. MedXpertQA 상대 37\% 향상(22.2 vs 16.1), Qwen3-32B에서도 +5.5.}
+\shot{research_9.JPG}{0.42}{MA-RAG 포스터. Solver/Retrieval/Ranking 에이전트 구조와 후두신경 사례 기반 다회전 추론.}
+\end{paperbox}
+
+\begin{paperbox}{Lab-in-the-Loop — 데이터·AI 기반 신약개발 (키노트)}
+\meta{Aviv Regev (EVP \& Head of Genentech Research and Early Development, gRED; Broad Institute; MIT) · ICML 2026 Invited Talk}
+\pcard
+{신약 후보의 \textbf{90\%+가 전임상·임상에서 실패}한다. 생물학 실험과 임상 데이터는 방대하지만 다음 실험 설계로 충분히 환류되지 못한다.}
+{전통적 신약개발은 실험$\rightarrow$분석$\rightarrow$가설이 \textbf{단선적}으로 흐르고, AI 모델은 대개 사후 분석에 머물러 실험 설계를 능동적으로 이끌지 못한다.}
+{실험·데이터·AI를 하나의 \textbf{폐루프}로 묶어, 모델이 다음 실험을 예측·설계하도록 만드는 것 (target discovery부터 drug development까지 전 단계).}
+{\textbf{Lab-in-the-Loop}: Human biology / experiments $\rightarrow$ Data $\rightarrow$ AI/ML $\rightarrow$ 다음 실험 설계로 순환하는 구조를 Genentech 전반에 구축.}
+\result{정량 벤치마크보다, Genentech의 대규모 lab-in-the-loop 구축 사례와 신약개발 전 단계에 걸친 적용 방향·비전을 제시.}
+\shot{research_15.jpeg}{0.38}{Aviv Regev 키노트 ``Lab in the Loop'' — 실험·데이터·AI의 순환 루프.}
+\end{paperbox}
+
+% ================================================================
+\sect{Tabular Learning}
+
+트리 기반 모델이 여전히 강한 tabular 영역에서, \textbf{귀납적 편향(inductive bias)의 명시적 설계}와
+\textbf{LLM의 예측적 추론 한계}를 각각 파고든 발표들이 눈에 띄었다.
+
+\begin{paperbox}{TopBench — Tabular QA의 암묵적 예측 추론 벤치마크}
+\meta{An-Yang Ji, Jun-Peng Jiang, De-Chuan Zhan, Han-Jia Ye · Nanjing University (LAMDA) · 포스터 · arXiv:2604.28076 · \url{github.com/LAMDA-Tabular/TopBench}}
+\pcard
+{LLM 기반 Table QA는 명시적 정보 검색·집계에서 발전했다. 그러나 실제 산업 질의는 healthcare·finance·daily consulting에서 historical table로부터 \textbf{관측되지 않은 값을 추론}하는 implicit predictive 성격을 띤다.}
+{WTQ·TabFact·Spider·BIRD 등 기존 벤치마크는 \textbf{explicit fact 검색·집계만} 평가한다. implicit predictive 시나리오 데이터가 없고, 중간 reasoning(intent 오인 vs 예측 modeling 결함)을 구분하지 못한다.}
+{implicit predictive TQA를 \textbf{2단계 추론}으로 형식화 — intent abstraction(질의에서 table에 없는 target feature profile $x'$ 추출) $\rightarrow$ predictive inference($f{:}\,x\!\rightarrow\!y$ 학습 후 $y'=f(x')$ 추정). Single-Point / Decision / Treatment Effect / Ranking\&Filtering 4개 task.}
+{\textbf{TopBench}: 35개 source table·3개 도메인·779개 샘플. User/Data Holder 이중 관점 질의, text-based·agentic ReAct 두 패러다임, 통계 지표 + LLM-as-a-Judge 하이브리드 평가.}
+\result{9개 모델 대부분 \textbf{0.60 미만} — 최고 Gemini 3 Flash도 Single-Point 0.65. Decision·Treatment는 무작위 추측 수준. agentic 실행 시 GPT-5.2 Treatment가 0.51$\rightarrow$0.65로 개선.}
+\shot{research_2.JPG}{0.42}{TopBench 포스터 (Nanjing U., LAMDA). 4계층 태스크 taxonomy와 text/agentic 실험 결과.}
+\end{paperbox}
+
+\begin{paperbox}{LassoFlexNet — Tabular 전용 유연 신경망 구조}
+\meta{Kry Yik Chau Lui, Cheng Chi, Kishore Basu, Yanshuai Cao · RBC Borealis (Toronto) · 포스터 · arXiv:2603.20631 · \url{github.com/BorealisAI/lassoflexnet}}
+\pcard
+{DNN이 vision·language를 지배하지만 tabular data에서는 XGBoost·CatBoost 같은 \textbf{tree 모델에 뒤처진다} — 무관 feature 강건성·axis alignment·localized irregular 함수 학습이라는 inductive bias 결핍 때문.}
+{LassoNet은 linear skip으로 Lasso를 딥러닝에 확장했으나 현대 tabular 벤치서 자주 underperform. \textbf{raw-input 상관에 의존}해 nonlinear importance를 못 잡고, joint Hier-Prox 최적화가 불안정하다. TabPFN·TabR은 규모 제약.}
+{\textbf{다섯 inductive bias}(무관 feature 강건성 · axis alignment · localized irregularity · feature heterogeneity · training stability)를 native하게 인코딩해, tree를 능가하면서 Lasso 수준의 sparse 선택·해석성을 유지하는 tabular-native 아키텍처.}
+{\textbf{represent-then-select}: Per-Feature Embedding(수치형 PLE·범주형 one-hot+ResNet) + Tied Group Lasso 선택 + cross-feature MLP-Mixer($\tau$ soft-curriculum) + EMA 기반 Seq-Hier-Prox-Adam-EMA optimizer.}
+\result{3개 벤치 52개 데이터셋에서 leading tree 모델을 매칭·능가(최대 \textbf{10\% 상대 향상}). noise feature selection에서 oracle two-stage 파이프라인을 제치고 50\% noise 8/12·75\% noise 7/12 top-3. California-housing ablation RMSE 0.4047(EMA 제거 0.4195).}
+\shot{research_4.JPG}{0.42}{LassoFlexNet 포스터 (RBC Borealis). represent-then-select 구조, ablation, TabZilla/TabRed 벤치마크.}
+\end{paperbox}
+
+\begin{paperbox}{Parametric Prior Mapping — 비정상 시계열 확률 예측}
+\meta{Jinglin Li, Jun Tan, QI Fang, Ning Gui · Central South University · 포스터 · arXiv:2605.23402}
+\pcard
+{확률적 MTS forecasting은 예측 불확실성을 특성화해 weather·finance·transportation 같은 고위험 의사결정에 핵심. \textbf{non-stationary} 동역학은 진화하는 분포·시변 stochasticity의 정확한 추적을 요구한다.}
+{DeepAR 등 parametric은 \textbf{고정 output family}(예: Gaussian)와 실제 분포의 불일치로 제약. diffusion/flow generative는 데이터·연산 과다에 느리다. TMDM·NsDiff는 \textbf{rigid prior}(고정 window 분산)로 분포 이동에 적응 못해 miscalibration.}
+{시변·진화하는 불확실성을 포착하는 non-stationary 확률적 MTS forecasting에서 \textbf{표현력 · robustness · 계산 효율}을 동시에 달성하는 문제.}
+{\textbf{PPM}: parametric 구조 prior를 generative 과정에 주입 — encoder가 conditional Gaussian prior의 통계량을 추론·resampling하고, 학습 가능한 \textbf{push-forward mapping}(2-layer MLP)이 sample-based 예측 분포로 사상. KDE-NLL + MSE anchor의 hybrid objective.}
+\result{7개 실세계 데이터셋에서 second-best 대비 \textbf{CRPS 최대 31.2\%·QICE 44.3\% 감소}, diffusion 대비 추론 약 $2$--$100\times$ 가속(ETTh1 CRPS 0.337, Traffic 0.252). prior ablation에서 +PM이 Gaussian·Uniform 모두 크게 개선.}
+\shot{research_5.JPG}{0.42}{Parametric Prior Mapping 포스터 (Central South U). prior mapping 구조와 ETT 벤치마크.}
+\end{paperbox}
+
+% ================================================================
+\sect{Diffusion Language Models}
+
+Diffusion 기반 언어모델의 \textbf{scaling law 성숙}과 \textbf{unmasking(생성 순서) 정책 학습}이 화두였다.
+
+\begin{paperbox}{Scaling Beyond Masked Diffusion Language Models}
+\meta{Subham Sekhar Sahoo, Jean-Marie Lemercier, Zhihan Yang, Justin Deschenaux, Jingyu Liu, John Thickstun, Ante Jukić · Cornell Tech / Cornell / EPFL / NVIDIA · 포스터 · arXiv:2602.15014}
+\pcard
+{Diffusion LM은 병렬·고속 생성으로 AR 모델을 대체할 후보이며, 그중 \textbf{Masked diffusion(MDLM)}이 강한 perplexity로 현재 지배적 위치. d-LLM은 통상 perplexity 같은 likelihood 지표로 비교된다.}
+{perplexity는 같은 family 안에서는 유효하나, 계열마다 likelihood bound가 달라 \textbf{cross-family 비교에서는 오도}될 수 있고 inference 속도·샘플 품질도 반영하지 못한다. 기존 scaling 연구는 대부분 MDLM에만 집중.}
+{Masked diffusion이 non-autoregressive 생성의 지배적 패러다임인가, 더 큰 설계공간의 현 선두일 뿐인가 — MDLM · Duo(uniform-state) · Eso-LM(interpolating) 세 계열의 \textbf{최초 IsoFLOP scaling law}로 검증.}
+{FLOPs를 맞춘 IsoFLOP 비교와 compute-optimal scaling law 적합. MDLM에 \textbf{low-variance(cross-entropy) 학습 목적} 도입, Gen PPL·throughput으로 speed--quality Pareto frontier 구성, 전 방법을 1.7B로 확장.}
+\result{low-variance 목적으로 MDLM이 약 12\% FLOPs-효율 향상(AR 대비 필요 compute $16\times\!\rightarrow\!14\times$). AR perplexity 매칭에 Duo 약 $23\times$·Eso-LM 약 $32\times$. 반전: SFT 후 \textbf{Duo가 GSM8K 65.8}로 AR 62.9·MDLM 58.8·Eso-LM 33.4를 모두 능가.}
+\shot{research_3.JPG}{0.42}{``Scaling Beyond Masked Diffusion'' 포스터. 좌: 생성 방식 비교, 우: scaling law와 downstream 평가.}
+\end{paperbox}
+
+\begin{paperbox}{Learning Unmasking Policies for Diffusion Language Models}
+\meta{Metod Jazbec, Theo X.\ Olausson, Louis Béthune, Pierre Ablin, Michael Kirchhof 외 · Apple / University of Amsterdam / MIT · Spotlight (oral talk) · arXiv:2512.09106}
+\pcard
+{Diffusion LLM(dLLM/MDM)은 여러 task에서 AR 성능을 따라잡으며 효율적 추론을 약속한다. 매 diffusion step에서 \textbf{어떤 토큰을 unmask할지} 정하는 sampling 절차가 핵심 설계 요소.}
+{confidence thresholding(Fast-dLLM) 등 \textbf{heuristic sampler}는 척도·threshold $\lambda$의 수작업 튜닝이 필요하고, block size가 커지거나 semi-AR 영역을 벗어나면 random 이하로 저하되며, NFE(compute)를 늘려도 이득이 없다.}
+{정확도와 효율을 모두 만족하는 최적 unmasking 순서는 무엇인가 — MDM sampling을 dLLM이 environment인 \textbf{MDP로 정식화}하고 unmasking policy를 RL로 학습.}
+{dLLM은 동결. token confidence 벡터 $\rightarrow$ Bernoulli unmask 결정을 내리는 \textbf{경량 single-layer transformer policy}(약 300K params, dLLM의 0.01\% 미만)를 \textbf{GRPO}로 학습 — correctness $\times$ step penalty의 multiplicative reward($\alpha$로 속도--정확도 조절).}
+\result{semi-AR(BL=32)에서 Fast-dLLM 등 SOTA heuristic과 대등, full-diffusion(BL=256)에서는 능가 — GSM8K를 약 12 NFE에 \textbf{약 50\%}(heuristic $\leq$30\%). 모델(LLaDA$\rightarrow$Dream)·시퀀스 길이 전이도 확인.}
+\shot{research_10.jpeg}{0.42}{Spotlight talk 슬라이드 — masked diffusion의 any-order 생성 개념(learned unmasking policy).}
+\end{paperbox}
+
+% ================================================================
+\sect{LLM 효율화 · 프롬프트}
+
+상용·대형 모델의 배포 비용 제약 아래, \textbf{극한 양자화}와 \textbf{블랙박스 프롬프트 최적화}로
+효율과 실용성을 끌어올린 발표들이다.
+
+\begin{paperbox}{CAT-Q — 저비용·정확 Ternary(1.58-bit) PTQ}
+\meta{Shigeng Wang, Chao Li, Yangyuxuan Kang, Jiawei Fan, Anbang Yao · Intel Labs China · Spotlight (oral talk · Poster \#3006) · arXiv:2606.26650 · \url{github.com/IntelChina-AI/BitTern}}
+\pcard
+{LLM은 메모리·연산 비용이 커 배포가 어렵다. \textbf{ternary(1.58-bit) quantization}은 FP16 대비 10배+ 메모리 절감과 곱셈$\rightarrow$덧셈 대체라는 hardware-friendly 이점을 갖는 극단적 압축 기법.}
+{SOTA ternary(BitNet 1.58-bit·TriLM·Tequila)는 \textbf{QAT 의존} — 수백 B tokens 재학습에 막대한 비용, 소규모($\leq$7B)에 국한. 일반 PTQ는 4-bit엔 통해도 \textbf{2-bit 이하에서 성능 붕괴}.}
+{\textbf{512 sequences 규모 calibration set만으로} 임의 architecture·규모의 pretrained LLM을 PTQ 방식으로 ternary화. 난제는 (1) 분포 misalignment로 인한 정보 손실, (2) non-differentiable 극저비트의 수렴 곤란.}
+{\textbf{LM(Learnable Modulation)}: $\delta_\mu,\delta_\alpha,\delta_\Delta$로 weight 분포·threshold를 조정해 outlier 억제. \textbf{ST(Softened Ternarization)}: differentiable$\rightarrow$hard 2단계 relay transition으로 안정 수렴. 둘을 sliding-layer reconstruction에 결합.}
+\result{512 calibration samples($\approx$1M tokens)로 100B tokens 학습한 BitNet을 능가 — \textbf{학습 토큰 약 $10^{5}\times$ 절감}. ternary화를 처음으로 \textbf{14B$\sim$235B}로 확장, Llama2-70B 정확도 하락 3.81\%. 10개 LLM·5개 zero-shot 벤치서 검증.}
+\shot{research_16.jpeg}{0.42}{CAT-Q(BitTern) Spotlight talk ``Takeaways'' 슬라이드 (Intel Labs China).}
+\end{paperbox}
+
+\begin{paperbox}{CRL-BPT — Black-Box 프롬프트 튜닝을 위한 Curriculum RL}
+\meta{Shuai Gong, Chaoran Cui, Xiaolin Dong, Chunyun Zhang, Linwei Fan · Shandong University of Finance and Economics · 포스터 (OpenReview/ICML poster 66416)}
+\pcard
+{상용 LLM/VLM은 파라미터·gradient가 비공개다. API 접근만으로 입력 프롬프트를 최적화하는 \textbf{Black-Box Prompt Tuning(BBPT)} 수요가 크다.}
+{soft prompt는 연속 벡터라 \textbf{해석성이 없고}, hard(discrete) prompt 탐색은 \textbf{대량 API 호출}이 필요하다. 초기의 과도한 탐색은 학습을 불안정하게 하고 overfitting을 유발.}
+{해석 가능한 프롬프트 생성과 API 효율을 동시에 달성하는 BBPT를, LLM 에이전트의 \textbf{탐색 스케줄 문제}로 정식화.}
+{\textbf{imitation $\rightarrow$ innovation 커리큘럼}: Dynamic Curriculum Schedule로 Imitation Loss(ROUGE-L)와 Innovation Loss를 점진 전환. Historical Loss Normalization + Relative Reward Calibration으로 안정화, black-box CLIP 위에서 RL 학습.}
+\result{13개 데이터셋 few-shot에서 Zero-shot CLIP·BAR·BlackVIP·BPTVLM·ZIP·StablePrompt 대비 우수(포스터 기준 Caltech \textbf{94.6} 등). 해석 가능한 프롬프트를 생성하면서 API 효율 개선.}
+\shot{research_14.jpeg}{0.42}{CRL-BPT 포스터 (Shandong UFE). imitation$\rightarrow$innovation 커리큘럼과 13개 데이터셋 결과.}
+\end{paperbox}
+
+% ================================================================
+\sect{학습 · 평가 · 해석가능성}
+
+옵티마이저·데이터·해석가능성 등 \textbf{학습과 평가의 전제 자체를 재검토}한 발표들이다.
+
+\begin{paperbox}{Do We Need Adam? — RLVR에서는 SGD로 충분하다}
+\meta{Sagnik Mukherjee, Lifan Yuan, Pavan Jayasinha, Dilek Hakkani-Tür, Hao Peng · UIUC · Spotlight (oral talk) · arXiv:2602.07729}
+\pcard
+{verifiable reward 기반 RL(\textbf{RLVR})은 LLM 학습의 핵심 단계가 되었다. 그러나 RL 최적화 관행은 근본적으로 다른 next-token-prediction 단계(pretraining·SFT)의 관행 — 특히 메모리 부담이 큰 \textbf{AdamW} — 을 그대로 답습한다.}
+{AdamW의 momentum·adaptive LR은 SFT/pretraining에 맞춰진 것으로 optimizer state에 파라미터당 약 12바이트를 요구. ``SGD는 대형 transformer에 부적합''하다는 통념은 \textbf{supervised 학습에서 도출된 결론}이라 RLVR에 그대로 적용되지 않을 수 있다.}
+{RLVR 학습에 \textbf{adaptive learning rate와 momentum이 정말 필요한가} — 메모리 효율적인 SGD가 RLVR에서 AdamW를 대등하게, 혹은 더 잘 수행할 수 있는가.}
+{RLVR이 Adam의 momentum·adaptive LR에서 얻는 이득이 SFT보다 작다는 가설. AdamW·SGD·SGD+Momentum·RMSProp을 math·coding·RLVE $\times$ Qwen3·Llama $\times$ GRPO·PPO에서 비교하고 \textbf{update sparsity·effective rank}를 분석.}
+\result{\textbf{SGD가 AdamW를 대등·능가}(coding Qwen3-1.7B pass@1 평균 +8.7\%). momentum·adaptive LR은 무익하거나 유해. SGD는 파라미터의 \textbf{0.02--0.46\%만 갱신}(AdamW 대비 최대 약 $500\times$ sparse), GPU 메모리 15.7\,GB 절감. PPO·장기 학습에도 일반화.}
+\shot{research_1.JPG}{0.42}{Spotlight talk 세션 전경 — 도입부 슬라이드 ``AdamW Is the Status Quo for Good Reasons''.}
+\end{paperbox}
+
+\begin{paperbox}{Less is Enough — Feature Coverage로 데이터 다양성 재정의}
+\meta{Zhongzhi Li, Xuansheng Wu, Yijiang Li, Lijie Hu, Ninghao Liu · University of Georgia / UCSD / MBZUAI / HK PolyU · Spotlight (oral talk) · arXiv:2602.10388}
+\pcard
+{post-training 데이터의 \textbf{diversity}는 LLM downstream 성능에 결정적이다. 그러나 다양·포괄적(long-tailed 포함) 데이터 수집은 비용이 크고, diverse 데이터를 원리적으로 구성하는 방법이 핵심 과제.}
+{기존 diversity metric은 text·embedding 공간의 변이만 측정 — \textbf{``text variance $\neq$ task variance''}로 downstream과 상관이 약하다. gradient 기반 방법은 checkpoint 의존으로 전이가 어렵고, 단순 LLM 합성은 중복·분포 편향을 낳는다.}
+{모델 내부 feature 공간에서 diversity를 정량화 — 생성 데이터가 커버하는 task-relevant feature 비율 \textbf{FAC(Feature Activation Coverage)}를 정의하고, SAE feature 공간의 distribution gap 최소화를 목표로 삼는다.}
+{\textbf{FAC Synthesis}: 모델 activation에 SAE를 학습해 interpretable feature를 얻고 $\rightarrow$ seed 데이터에서 \textbf{missing feature를 진단} $\rightarrow$ feature별 contrastive pair를 few-shot demonstration 삼아 해당 feature를 활성화하는 샘플을 합성(diagnose-then-synthesize).}
+\result{FAC는 downstream 성능과 강한 상관(Pearson $r{=}0.95$). \textbf{2K 합성 샘플}로 300K를 쓰는 MAGPIE에 필적 — 약 \textbf{$150\times$ 데이터 효율}. Toxicity AUPRC +23.63·Reward Modeling +13.32 등 4개 task 전부 향상, cross-model transfer 확인.}
+\shot{research_13.jpeg}{0.42}{Spotlight talk 결론 슬라이드 — Coverage 목표, 150$\times$ 데이터 효율, diagnose-then-synthesize 폐루프.}
+\end{paperbox}
+
+\begin{paperbox}{SENSEI — Knowledge-Gap Localization 기반 해석가능 AI 보조}
+\meta{Ayano Hiranaka, Ya-Chuan Hsu, Stefanos Nikolaidis, Erdem Bıyık, Daniel Seita · USC · 포스터 · arXiv:2606.05602}
+\pcard
+{human-AI 협업에서 AI 보조는 alert·steering 같은 behavioral feedback로 즉각 실수를 막는다. 그러나 반복 실수를 유발하는 \textbf{근본 misconception}을 고치지 못하면 장기적 개선이 어렵다(learning sciences 관점).}
+{shared autonomy·steering은 \textbf{``move''만 고칠 뿐} 사람의 task ``mind''를 교정하지 못하고 재사용 가능한 진단도 없다. ITS/misconception 기법은 대규모 주석이나 instructor-authored bug library에 의존.}
+{long-horizon 의사결정 보조를 \textbf{knowledge correction}으로 정식화 — behavior alignment를 structured knowledge alignment로 근사해, expert·student 지식의 불일치(\textbf{knowledge gap})를 localize하고 최소 correction을 합성.}
+{\textbf{2-stage SENSEI}: PDDL로 지식 표현, frozen CodeT5+ encoder 위에서 (1) localization network가 misaligned component 탐지 $\rightarrow$ (2) latent editor가 expert embedding을 편집해 decoder가 student 지식 생성. single-misconception + mixup loss로 zero-shot compositional generalization.}
+\result{Breakfast/Overcooked/Rover에서 Sys-F1 \textbf{0.709/0.726/0.561}로 최고 균형, localize 후 Edit-acc 0.97--1.0. 1-misconception만 학습해도 2--3개 중첩에 zero-shot 일반화. 사용자 20명 연구에서 \textbf{misconception 90\% 교정}(Sys-rec 0.895), IoU 0.736$\rightarrow$0.844.}
+\shot{research_6.JPG}{0.42}{SENSEI 포스터 (USC). 관찰$\rightarrow$진단$\rightarrow$보조 프레임워크와 PDDL 기반 실험.}
+\end{paperbox}
+
+\end{document}

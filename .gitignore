@@ -1,0 +1,35 @@
+# LaTeX out-of-tree build artifacts (slides build into <slides>/build/)
+**/build/
+*.aux
+*.log
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.nav
+*.snm
+*.toc
+*.out
+*.bbl
+*.blg
+
+# Per-paper scratch space (extracted text, intermediate notes) — not committed.
+# Final deliverables (summary.md, translation.md, slides/*.tex) ARE committed.
+papers/*/_workspace/
+
+# icml_2026: 원본 촬영 사진(145MB)과 arXiv 논문 PDF(41MB)는 커밋하지 않음.
+# 리포트는 report/assets/(EXIF 보정·다운샘플 사본)만으로 재빌드 가능하고,
+# 논문 PDF는 icml_2026/papers/README.md 의 링크/스크립트로 재다운로드.
+icml_2026/pictures/
+icml_2026/papers/*.pdf
+
+# OS / editor
+.DS_Store
+*~
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/

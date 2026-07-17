@@ -1,0 +1,27 @@
+slug: ma-rag
+title: "From Conflict to Consensus: Boosting Medical Reasoning via Multi-Round Agentic RAG"
+authors:
+  - Wenhao Wu (Nanjing University; Huawei Noah's Ark Lab)
+  - Zhentao Tang (Huawei Noah's Ark Lab)
+  - Yafu Li (The Chinese University of Hong Kong)
+  - Shixiong Kai (Huawei Noah's Ark Lab)
+  - Mingxuan Yuan (Huawei Noah's Ark Lab)
+  - Zhenhong Sun (Australian National University)
+  - Chunlin Chen (Nanjing University)
+  - Zhi Wang (Nanjing University)
+venue: "ICML 2026 (43rd International Conference on Machine Learning), PMLR 306"
+year: 2026
+arxiv: "2603.03292v3"
+code: "https://github.com/NJU-RL/MA-RAG"
+source_pdf: "assets/2603.03292v3.pdf"
+pages: 27
+keywords:
+  - medical reasoning
+  - retrieval-augmented generation
+  - agentic RAG
+  - test-time scaling
+  - self-consistency
+deliverables:
+  summary: "papers/ma-rag/summary.md"
+  translation: "papers/ma-rag/translation.md"
+  slides: "papers/ma-rag/slides/slide.tex"

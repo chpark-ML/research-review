@@ -1,0 +1,125 @@
+% =====================================================================
+% research-review standard Beamer preamble  (XeLaTeX, 16:9, slate-blue)
+% Copy this block verbatim at the top of papers/<slug>/slides/slide.tex,
+% then add \begin{document} ... your frames ... \end{document}.
+% Build: make slide PAPER=<slug>   (XeLaTeX 2-pass, out-of-tree → build/)
+% =====================================================================
+\documentclass[10pt, aspectratio=169]{beamer}
+
+% --- Theme (clean, no external theme packages) -----------------------
+\usetheme{default}
+\usecolortheme{default}
+\useinnertheme{circles}
+\setbeamertemplate{navigation symbols}{}
+
+% --- Fonts: XeLaTeX + fontspec, sans-serif body ----------------------
+% fontspec defaults to Latin Modern (loaded by file from the texmf tree),
+% so this needs NO fontconfig/system font registration — portable on any
+% TeX Live / MacTeX. Do NOT \setmainfont{Latin Modern Roman}: the by-name
+% lookup needs fontconfig and fails on stock MacTeX.
+\usepackage{fontspec}
+\usefonttheme{professionalfonts}      % keep math glyphs in CM, not sans
+\renewcommand{\familydefault}{\sfdefault}   % Latin Modern Sans body
+% For a CJK deck, add:  \usepackage{kotex}  (or set a CJK font via fontspec)
+
+% --- Packages --------------------------------------------------------
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}                 % \rowcolor for table row highlight
+\usepackage[font=scriptsize]{caption}
+\usepackage[most]{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning}   % for conceptual flow diagrams
+\usepackage{pifont}                   % \ding{51}/\ding{55} check/cross marks for comparison tables
+
+% --- Palette (3-5 colors, WCAG AA contrast) --------------------------
+\definecolor{accent}{HTML}{1F3A5F}      % deep slate-blue — titles, rules, links
+\definecolor{accentSoft}{HTML}{5C7AA0}  % muted slate — subtitles
+\definecolor{ink}{HTML}{1A1A1A}         % body text
+\definecolor{muted}{HTML}{6B6B6B}       % captions, metadata
+\definecolor{rulec}{HTML}{D8DEE6}       % thin separator rules
+\definecolor{boxbg}{HTML}{F4F6FA}       % tcolorbox / block background tint
+\definecolor{crimson}{HTML}{780016}     % rare emphasis only (diagrams)
+% --- Semantic keyword emphasis: positive = blue, negative = magenta --------
+\definecolor{posblue}{HTML}{0066FF}     % positive-wording emphasis (blue)
+\definecolor{negmag}{HTML}{D6009C}      % negative-wording emphasis (magenta)
+\newcommand{\good}[1]{{\color{posblue}\bfseries #1}}  % wrap positive keyword
+\newcommand{\warn}[1]{{\color{negmag}\bfseries #1}}   % wrap negative keyword
+\newcommand{\blue}{\color{posblue}\bfseries}  % legacy switch -> positive (now bold)
+\newcommand{\hl}{\color{posblue}\bfseries}    % legacy standout -> positive blue
+
+% --- Beamer colors ---------------------------------------------------
+\setbeamercolor{normal text}{fg=ink}
+\setbeamercolor{structure}{fg=accent}
+\setbeamercolor{frametitle}{fg=accent}
+\setbeamercolor{framesubtitle}{fg=accentSoft}
+\setbeamercolor{title}{fg=accent}
+\setbeamercolor{subtitle}{fg=accentSoft}
+\setbeamercolor{section in toc}{fg=accent}
+\setbeamercolor{itemize item}{fg=accent}
+\setbeamercolor{itemize subitem}{fg=accentSoft}
+\setbeamercolor{enumerate item}{fg=accent}
+\setbeamercolor{block title}{fg=white, bg=accent}
+\setbeamercolor{block body}{fg=ink, bg=boxbg}
+\setbeamercolor{caption name}{fg=accent}
+
+\setbeamerfont{frametitle}{series=\bfseries, size=\large}
+\setbeamerfont{framesubtitle}{series=\mdseries, size=\small}
+\setbeamerfont{title}{series=\bfseries, size=\LARGE}
+\AtBeginDocument{\footnotesize}   % single body baseline for the whole deck
+
+% --- Footline: short-title (left) / page (right) ---------------------
+\setbeamertemplate{footline}{%
+  \leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=\paperwidth, ht=2.4ex, dp=1.5ex, leftskip=1.2em, rightskip=1.2em, sep=0pt]{}%
+      {\color{muted}\scriptsize\insertshorttitle}%
+      \hfill%
+      {\color{accent}\scriptsize$\bullet$}\hspace{0.6em}%
+      {\color{muted}\scriptsize\insertframenumber\,/\,\inserttotalframenumber}%
+    \end{beamercolorbox}%
+  }%
+  \vspace{2pt}%
+}
+
+% --- Itemize bullets -------------------------------------------------
+\setbeamertemplate{itemize item}{\small$\blacktriangleright$}
+\setbeamertemplate{itemize subitem}{\small$\triangleright$}
+\setbeamertemplate{itemize subsubitem}{\scriptsize\textendash}
+
+% --- Section divider: one full-bleed page per section ----------------
+\AtBeginSection[]{%
+  \begin{frame}[plain, noframenumbering]
+    \vfill
+    \begin{center}
+      {\color{muted}\scriptsize\MakeUppercase{Section \insertsectionnumber}}\\[8pt]
+      {\color{accent}\Large\bfseries\insertsectionhead}\\[12pt]
+      {\color{accent}\rule{0.22\paperwidth}{0.8pt}}
+    \end{center}
+    \vfill
+  \end{frame}%
+}
+
+% --- tcolorbox defaults: inline title (box width = content width) ----
+\tcbset{
+  enhanced,
+  colframe=accent!55,
+  colback=boxbg,
+  coltitle=accent,
+  boxrule=0.4pt,
+  arc=2pt,
+  left=5pt, right=5pt, top=3pt, bottom=3pt,
+  fonttitle=\bfseries\small,
+  title style={left color=accent!8, right color=accent!8},
+  separator sign={\,:},
+}
+
+\hypersetup{colorlinks=true, linkcolor=accent, citecolor=accent, urlcolor=accent}
+
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\argmin}{argmin}

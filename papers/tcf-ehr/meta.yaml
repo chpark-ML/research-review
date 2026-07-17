@@ -1,0 +1,25 @@
+# Bibliographic metadata — tcf-ehr
+title: "Time-Conditioned Foreseeing: An EHR-Specific Foundation Model for Irregular Dynamics and Calendrical Time"
+title_submission: "Time Conditioned Foreseeing: Temporal Generative Pretraining for EHR Foundation Models"
+authors:
+  - Bong Gyun Kang
+  - Junyong Ahn
+  - Hyeongrok Han
+  - Sungroh Yoon
+affiliation: Seoul National University
+venue: "ICML 2026 (poster)"
+year: 2026
+icml_url: https://icml.cc/virtual/2026/poster/64928
+pdf: assets/20012_Time_Conditioned_Foresee.pdf   # anonymized ICLR-2026 submission version
+slug: tcf-ehr
+key_contributions:
+  - "Pathology-Focused Binning — KDE density-based, inverse-density weighted percentile binning; more bins to clinically critical pathologic ranges, no Gaussianity assumption."
+  - "Dual-Calendar RoPE — partitions RoPE dims into a positional component (order of co-occurring events) and a calendrical-temporal component (minute/hour/day/month...)."
+  - "Time-Conditioned Foreseeing (TCF) — extends next-token prediction with next-time prediction (L_next_time) + multi-horizon event forecasting (L_foresee); first genuine temporal generative EHR model."
+datasets: "MIMIC-III benchmark (+ extra tasks); feature configs 117 / 17 / 6."
+downstream_tasks: "IHM, Phenotyping, Dec-death, Dec-arrest, LOS, Oliguria/Anuria (HUO), Vasopressor (Vaso)."
+baselines: "HEART, MOTOR, EHRSHOT, TRADE, EHRmamba, FM4EHR, ETHOS, STraTS."
+note: >
+  The ICML 2026 poster abstract cites 9 downstream tasks and up to a 48% AUPRC improvement;
+  the provided PDF (ICLR-2026 submission) reports 7 downstream tasks. All deliverable body
+  content/numbers are drawn from the provided PDF; the official ICML title + named authors are used.
